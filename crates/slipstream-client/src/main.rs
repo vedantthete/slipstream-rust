@@ -26,7 +26,7 @@ use runtime::run_client;
     )
 )]
 struct Args {
-    #[arg(long = "tcp-listen-host", default_value = "::")]
+    #[arg(long = "tcp-listen-host", default_value = "0.0.0.0")]
     tcp_listen_host: String,
     #[arg(long = "tcp-listen-port", short = 'l', default_value_t = 5201)]
     tcp_listen_port: u16,
