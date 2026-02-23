@@ -244,9 +244,18 @@ pub fn resolve_host_port(address: &HostPort) -> Result<SocketAddr, ConfigError> 
 pub fn normalize_dual_stack_addr(addr: SocketAddr) -> SocketAddr {
     match addr {
         SocketAddr::V4(v4) => {
-            SocketAddr::V6(SocketAddrV6::new(v4.ip().to_ipv6_mapped(), v4.port(), 0, 0))
+            // STOP: Do not map to IPv6. Return the IPv4 address as is.
+            SocketAddr::V4(v4)
         }
-        SocketAddr::V6(v6) => SocketAddr::V6(v6),
+        SocketAddr::V6(v6) => {
+            // If we encounter an IPv6 address that is actually a mapped IPv4,
+            // unmap it to keep the kernel happy.
+            if let Some(v4) = v6.ip().to_ipv4_mapped() {
+                SocketAddr::V4(SocketAddrV4::new(v4, v6.port()))
+            } else {
+                SocketAddr::V6(v6)
+            }
+        }
     }
 }
 
